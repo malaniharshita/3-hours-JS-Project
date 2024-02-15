@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h3 style="text-align: center;">To-Do-List</h3>
+    <form onsubmit="addForm(event)">
+        <label>ToDo Name</label>
+        <input type = "text" name = "name" id = "name">
+        <label>Description</label>
+        <input type = "text" name = "des" id = "des">
+        <button value = "Submit">Add</button>
+        <ul id = "listOfItems">
+        </ul>
+        <ul id = "listOfItems1">
+        </ul>
+    </form>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js">
+    </script>
+     <script>
+    function addForm(event){
+        event.preventDefault();
+        let name = event.target.name.value;
+        let description = event.target.des.value;
+        let flag = false;
+        const obj = {
+            name : name,
+            description : description,
+            flag : false
+        }
+
+        axios.post('https://crudcrud.com/api/63f68622abee4efd8f81d173b915c642/data',obj)
+        .then((res) => {
+            show(res.data);
+            //console.log(res);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+
+    }
+    window.addEventListener("DOMContentLoaded", ()=>{
+      axios.get('https://crudcrud.com/api/63f68622abee4efd8f81d173b915c642/data')
+      .then((res) => {
+        //console.log(res.data[4].flag);
+        for(let i = 0; i<res.data.length; i++){
+            if(res.data[i].flag==false){
+                show(res.data[i]);
+            }
+            else{
+                show1(res.data[i]);
+            }
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    })
+    
+    function show(obj){
+        //console.log(obj);
+        
+            let items = document.getElementById('listOfItems');
+            let li = document.createElement('li');
+            li.id = obj._id;
+            li.appendChild(document.createTextNode(`${obj.name}`));
+            li.appendChild(document.createTextNode(` ${obj.description}`));
+            let rightbutton = document.createElement('button');
+            rightbutton.type = 'button'
+            rightbutton.appendChild(document.createTextNode('Tick'));
+
+            let wrongbutton = document.createElement('button');
+            wrongbutton.type = 'button'
+            wrongbutton.appendChild(document.createTextNode("unTick"));
+
+            li.appendChild(rightbutton);
+            li.appendChild(wrongbutton);
+
+            items.appendChild(li);
+
+            rightbutton.onclick = () => {
+            
+                let userId = obj._id;
+                fun1(userId,obj)
+                show1(obj);
+                removeUserFromScreen(userId);
+
+                
+            }
+        }
+
+     function removeUserFromScreen(userId){
+        //console.log(userId)
+        let parentEle = document.getElementById('listOfItems');
+        let childNodeToBeDeleted = document.getElementById(userId);
+        //console.log("this is"+childNodeToBeDeleted);
+        if(childNodeToBeDeleted){
+          parentEle.removeChild(childNodeToBeDeleted);
+        }
+    }
+
+    function fun1(userId,obj){
+        axios.put('https://crudcrud.com/api/63f68622abee4efd8f81d173b915c642/data/' +userId,{
+                    name:obj.name,
+                    description: obj.description,
+                    flag : 'true'
+        })
+        .then(response => console.log(response.data))
+         .catch(error => console.error(error));
+    }
+        
+    
+    function show1(obj){
+        //console.log(obj.description);
+        let items = document.getElementById('listOfItems1');
+        let li = document.createElement('li');
+        li.id = obj._id;
+        li.appendChild(document.createTextNode(`${obj.name}`));
+        li.appendChild(document.createTextNode(` ${obj.description}`));
+        items.appendChild(li);
+    }
+    
+
+
+   
+
+    </script>
+</body>
+</html>
